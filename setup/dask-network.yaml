@@ -1,0 +1,38 @@
+description: Template to test Neutron resources
+heat_template_version: '2013-05-23'
+
+parameters:
+  public_net_id:
+    type: string
+    description: >
+      ID of public network for which floating IP addresses will be allocated
+    default: 9b1cc1ab-2648-48b4-bec4-140e41e6f7bb
+
+
+resources:
+  external_router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info: {network: { get_param: public_net_id }}
+      name: external_router
+
+  private_external:
+    properties: {name: dask_network}
+    type: OS::Neutron::Net
+
+  private_external_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: {Ref: private_external}
+      cidr: 10.20.18.0/24
+      allocation_pools:
+      - {end: 10.20.18.150, start: 10.20.18.20}
+
+      dns_nameservers: [10.95.121.180, 10.95.48.36, 195.235.92.40]
+      ip_version: 4
+
+  router_ext_interface:
+    properties:
+      router_id: {Ref: external_router}
+      subnet_id: {Ref: private_external_subnet}
+    type: OS::Neutron::RouterInterface

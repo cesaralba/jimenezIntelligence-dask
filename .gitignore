@@ -1,0 +1,15 @@
+SACBenv
+.project
+__pycache__
+.pydevproject
+.settings
+.spyproject
+.Rhistory
+*.sw*
+.cache
+*.log
+*.pyc
+.loadEnv
+.idea
+
+/setup/distr

@@ -1,0 +1,9 @@
+parameters:
+  num_nodes: 6
+  key_name: 'CAP Isuzu'
+  image_id: CentOS7.5-1804-Minimal-20180515
+  admin_user: cloud-user
+  flavor_node: TID-02CPU-04GB-20GB
+  public_net_id: 7dd8d467-9668-4e5a-8983-3620bd594e37
+
+
