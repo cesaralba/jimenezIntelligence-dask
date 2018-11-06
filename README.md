@@ -8,4 +8,11 @@
 
 2. Copiar el ejemplo de fichero de entorno (environment_sample.yaml) a otro nombre (ej cap-environment.yaml) y editar los valores al gusto
 
+~~~
+ openstack stack create -e EPG-env.yaml -t heat-hadoop-cluster.yaml dask-cluster --wait -v
+ openstack server list | awk '{print $9}' | grep 10.95 > clientList.txt 
+
+penstack stack delete dask-cluster -y  -v --wait
+
+~~~
 

@@ -13,3 +13,4 @@ __pycache__
 .idea
 
 /setup/distr
+clientList.txt

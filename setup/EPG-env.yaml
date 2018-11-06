@@ -1,9 +1,10 @@
 parameters:
-  num_nodes: 6
-  key_name: 'CAP Isuzu'
+  num_nodes: 9
+  key_name: 'CAPisuzu'
   image_id: CentOS7.5-1804-Minimal-20180515
   admin_user: cloud-user
-  flavor_node: TID-02CPU-04GB-20GB
+  flavor_node: TID-01CPU-02GB-20GB
   public_net_id: 7dd8d467-9668-4e5a-8983-3620bd594e37
-
+  private_net_id: f7a7bf99-7586-4c93-bb61-963f5bf1a8fa
+  private_subnet_id: 0f2b8670-2454-46c3-b930-cf442ce739fd
 
