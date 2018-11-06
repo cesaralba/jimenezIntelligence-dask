@@ -1,0 +1,101 @@
+heat_template_version: 2013-05-23
+
+description: >
+  HOT template to deploy an automation server to host the REST API for 
+  onboarding automation and assign a floating IP address to the server
+
+
+#| 6ef41b19feb94f41831ec7b3fe24aaf6 | CAP-TEST  
+
+parameters:
+  num_nodes:
+    type: string
+    description: Number of nodes
+    default: 1
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+    default: 'CAP Isuzu'
+  image_id:
+    type: string
+    description: ID of image to use for servers
+    default: TID-RH7-1NIC.20170807 #CentOS-7 
+  admin_user:
+    type: string
+    description: Username of admin user
+    default: cloud-user
+  flavor_node:
+    type: string
+    description: Flavor to use for servers
+    default: TID-02CPU-04GB-20GB
+  public_net_id:
+    type: string
+    description: >
+      ID of public network for which floating IP addresses will be allocated
+    default: 9b1cc1ab-2648-48b4-bec4-140e41e6f7bb
+  private_net_id:
+    type: string
+    description: ID of private network into which servers get deployed
+    default: f6f98460-462b-45ec-9ac0-985b100af526
+  private_subnet_id:
+    type: string
+    description: ID of private sub network into which servers get deployed
+    default: f6f98460-462b-45ec-9ac0-985b100af526
+
+#  ssh_security_group:
+#    type: string
+#    description: ID of a security-group that allows SSH traffic
+#    default:  sg-SSHin
+#  DASK_security_group:
+#    type: string
+#    description: ID of a security-group that allows SSH traffic
+#    default:  sg-DASK
+
+
+resources:
+
+  dask_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: Add security group rules for server
+      name: dask-sg
+      rules:
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 8786
+          port_range_max: 8790
+
+  ssh_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: Add security group rules for server
+      name: ssh-sg
+      rules:
+      - remote_ip_prefix: 0.0.0.0/0
+        protocol: tcp
+        port_range_min: 22
+        port_range_max: 22
+
+  dask_nodes:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: num_nodes }
+      resource_def:
+        type: heat-machine_without_disk.yaml
+        properties:
+          server_name: dask-server-%index%
+          key_name: { get_param: key_name }
+          image_id: { get_param: image_id }
+          admin_user: { get_param: admin_user }
+          flavor: { get_param: flavor_node }
+          public_net_id: { get_param: public_net_id }
+          private_net_id: { get_param: private_net_id }
+          private_subnet_id: { get_param: private_subnet_id }
+          security_group_list:
+              - { get_resource: ssh_security_group }
+              - { get_resource: dask_security_group }
+
+outputs:
+  dask_nodes_data:
+    description: full node entry for nodes
+    value: {get_attr: [dask_nodes, node_data]}

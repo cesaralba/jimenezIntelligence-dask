@@ -1,0 +1,65 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Template for maquina con un disco
+
+parameters:
+  key_name:
+    type: string
+  image_id:
+    type: string
+  admin_user:
+    type: string
+  flavor:
+    type: string
+  public_net_id:
+    type: string
+  private_net_id:
+    type: string
+  private_subnet_id:
+    type: string
+  security_group_list:
+    type: comma_delimited_list
+  server_name:
+    type: string
+
+resources:
+  nodeitem:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: server_name }
+      admin_user: { get_param: admin_user }
+      image: { get_param: image_id }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: nodeitem_port }
+      user_data_format: RAW
+      user_data: |
+        #!/bin/bash
+        yum install -y byobu git gcc python-devel python2-pip
+        pip install --upgrade pip
+        pip install "dask[complete]" paramiko
+
+  nodeitem_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: private_net_id }
+      fixed_ips:
+        - subnet_id: { get_param: private_subnet_id }
+      security_groups: { get_param: security_group_list }
+
+  nodeitem_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public_net_id }
+      port_id: { get_resource: nodeitem_port }
+
+outputs:
+  node_data:
+    description: Floating IP address of Hadoop Data Node in public network
+    value: [{ get_attr: [ nodeitem, name ] },
+            { get_attr: [ nodeitem_floating_ip, floating_ip_address ] },
+            { get_attr: [ nodeitem, first_address ] },
+            ""
+           ]
