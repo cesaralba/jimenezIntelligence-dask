@@ -8,10 +8,14 @@ description: >
 #| 6ef41b19feb94f41831ec7b3fe24aaf6 | CAP-TEST  
 
 parameters:
-  num_nodes:
+  num_workers:
     type: string
-    description: Number of nodes
+    description: Number of worker nodes
     default: 1
+  num_scheduler:
+    type: string
+    description: Number of scheduler (0 or 1)
+    default: 0
   key_name:
     type: string
     description: Name of keypair to assign to servers
@@ -79,7 +83,7 @@ resources:
   dask_nodes:
     type: OS::Heat::ResourceGroup
     properties:
-      count: { get_param: num_nodes }
+      count: { get_param: num_workers }
       resource_def:
         type: heat-machine_without_disk.yaml
         properties:
@@ -95,7 +99,29 @@ resources:
               - { get_resource: ssh_security_group }
               - { get_resource: dask_security_group }
 
+  dask_scheduler:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: num_scheduler }
+      resource_def:
+        type: heat-machine_without_disk.yaml
+        properties:
+          server_name: dask-scheduler
+          key_name: { get_param: key_name }
+          image_id: { get_param: image_id }
+          admin_user: { get_param: admin_user }
+          flavor: { get_param: flavor_node }
+          public_net_id: { get_param: public_net_id }
+          private_net_id: { get_param: private_net_id }
+          private_subnet_id: { get_param: private_subnet_id }
+          security_group_list:
+              - { get_resource: ssh_security_group }
+              - { get_resource: dask_security_group }
+
 outputs:
   dask_nodes_data:
     description: full node entry for nodes
     value: {get_attr: [dask_nodes, node_data]}
+  dask_scheduler_data:
+    description: full node entry for nodes
+    value: {get_attr: [dask_scheduler, node_data]}

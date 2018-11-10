@@ -1,17 +1,11 @@
 parameters:
-  num_namenodes: 1
-  num_datanodes: 6
-  key_name: 'CAP Isuzu'
-  image_id: TID-RH7-1NIC.20170807 #CentOS-7 
+  num_workers: 5
+  num_scheduler: 1
+  key_name: 'CAPisuzu'
+  image_id: CentOS7.5-1804-Minimal-20180515
   admin_user: cloud-user
-  flavor_salto: TID-01CPU-01GB-20GB
-  flavor_proxy: TID-01CPU-01GB-20GB
-  extra_disk_salto: 150
-  flavor_nodes: TID-04CPU-16GB-20GB
-  extra_disk_namenode: 20
-  extra_disk_datanode: 60
-  public_net_id: 9b1cc1ab-2648-48b4-bec4-140e41e6f7bb
-  public_net2_id: 9b1cc1ab-2648-48b4-bec4-140e41e6f7bb
-  private_net_id: 2508c529-42f3-464d-ac22-355cbf3b561d
-  private_subnet_id: f6f98460-462b-45ec-9ac0-985b100af526
-  ssh_security_group: CAP-sshIn
+  flavor_node: TID-02CPU-04GB-20GB
+  public_net_id: 7dd8d467-9668-4e5a-8983-3620bd594e37
+  private_net_id: f7a7bf99-7586-4c93-bb61-963f5bf1a8fa
+  private_subnet_id: 0f2b8670-2454-46c3-b930-cf442ce739fd
+
