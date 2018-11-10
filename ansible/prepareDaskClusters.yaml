@@ -1,0 +1,39 @@
+- name: Prepare remote hosts for runing Dask
+  hosts: dask-workers
+  gather_facts: False
+  become: True
+
+  tasks:
+
+  - name: "Install required packages"
+    yum:
+      name: "{{ packages }}"
+      state: latest
+    vars:
+      packages:
+        - byobu
+        - git
+        - gcc
+        - python36
+        - python36-devel
+        - python36-setuptools.noarch
+
+  - name: "Install pip"
+    easy_install:
+      executable: /bin/easy_install-3.6
+      name: "pip"
+      state: latest
+
+  - name: "Install pip modules"
+    pip:
+      executable: /usr/local/bin/pip
+      name: "{{ modules }}"
+      state: latest
+    vars:
+      modules:
+        - "dask[complete]"
+        - "paramiko"
+        - "joblib"
+        - "bokeh"
+      
+
