@@ -1,5 +1,5 @@
 - name: Prepare remote hosts for runing Dask
-  hosts: dask-workers
+  hosts: all
   gather_facts: False
   become: True
 
@@ -34,6 +34,121 @@
         - "dask[complete]"
         - "paramiko"
         - "joblib"
+        - "distributed"
+        - "dask-yarn"
         - "bokeh"
-      
+
+        - "ConfigArgParse"
+
+        - "bs4"
+        - "MechanicalSoup"
+        - "babel"
+        - "pandas"
+
+        - "XlsxWriter==1.0.2"
+
+
+- name: Prepare dask workers
+  hosts: all
+  gather_facts: False
+  become: False
+
+  vars_files:
+  - "vars/dask-vault.yaml"
+
+  tasks:
+    - name: Copy SSH private key
+      copy:
+        content: "{{ sshPriv }}"
+        dest: "{{ '/home/' + ansible_ssh_user + '/.ssh/id_rsa' }}"
+        owner: "{{ ansible_ssh_user }}"
+        group: "{{ ansible_ssh_user }}"
+        mode: "0600"
+
+    - name: "Enable public key"
+      authorized_key:
+        user: "{{ ansible_ssh_user }}"
+        key: "{{ sshPub }}"
+        state: present
+
+    - name: "Crea key scanner"
+      vars:
+        hostList: "{{ groups['all'] }}"
+      template:
+        dest: "{{ '/home/' + ansible_ssh_user + '/keyscanner.sh'  }}"
+        src: "keyscanner.sh.j2"
+        owner: "{{ ansible_ssh_user }}"
+        group: "{{ ansible_ssh_user }}"
+        mode: "0755"
+
+    - name: "Ejecuta key scanner"
+      shell: "{{ '/home/' + ansible_ssh_user + '/keyscanner.sh'  }}"
+
+    - name: "Get SACB code"
+      git:
+        repo: "https://github.com/cesaralba/jimenezIntelligence.git"
+        clone: yes
+        dest: "{{ '/home/' + ansible_ssh_user + '/guesser'  }}"
+
+    - name: "Cambia de rama"
+      shell: "cd {{ '/home/' + ansible_ssh_user + '/guesser'  }} ; git checkout 01_guesser_1819"
+
+    - name: "Chapu para los modulos"
+      shell: "echo PYTHONPATH=$PYTHONPATH:{{ '/home/' + ansible_ssh_user + '/guesser'  }} >> {{ '/home/' + ansible_ssh_user + '/.bashrc'  }} "
+
+
+- name: Prepare dask scheduler
+  hosts: dask-scheduler
+  gather_facts: False
+  become: False
+
+  tasks:
+  - name: "kk"
+    debug: var="{{ hostvars[item]['intip'] }}"
+    with_items: "{{ groups['dask-scheduler'] }}"
+
+  - name: "Crea lista de workers"
+    vars:
+      workerList: "{{ groups['dask-workers'] }}"
+    template:
+      dest: "{{ '/home/' + ansible_ssh_user + '/dask-workers.lst'  }}"
+      src: "dask-workers.lst.j2"
+      owner: "{{ ansible_ssh_user }}"
+      group: "{{ ansible_ssh_user }}"
+      mode: "0644"
+
+    # La cosa interesante es que cree el .byobu
+  - name: "Conf inicial del byobu"
+    shell: "/usr/bin/byobu-select-backend screen"
+
+  - name: "Conf de ventanas del byobu"
+    vars:
+      shedulerIP: "{{ hostvars[groups['dask-scheduler'][0]]['intip'] }}"
+    template:
+      src: "byobu.windows.j2"
+      dest: "{{ '/home/' + ansible_ssh_user + '/.byobu/windows'  }}"
+      owner: "{{ ansible_ssh_user }}"
+      group: "{{ ansible_ssh_user }}"
+      mode: "0644"
+
+  - name: "Keybindings del byobu"
+    copy:
+      src: "byobu.keybindings"
+      dest: "{{ '/home/' + ansible_ssh_user + '/.byobu/keybindings'  }}"
+      owner: "{{ ansible_ssh_user }}"
+      group: "{{ ansible_ssh_user }}"
+      mode: "0644"
+
+
+
+#  - name: "Crea config de byobu"
+#    vars:
+#      workerList: "{{ groups['dask-workers'] }}"
+#    template:
+#      dest: "{{ '/home/' + ansible_ssh_user + '/dask-workers.lst'  }}"
+#      src: "dask-workers.lst.j2"
+#      owner: "{{ ansible_ssh_user }}"
+#      group: "{{ ansible_ssh_user }}"
+#      mode: "0644"
+#
 

@@ -1,0 +1,3 @@
+{% for node in hostList  %}
+ssh-keyscan -t rsa  {{ hostvars[node]['intip'] }} >> {{ '/home/' + ansible_ssh_user + '/.ssh/known_hosts' }}
+{% endfor %}

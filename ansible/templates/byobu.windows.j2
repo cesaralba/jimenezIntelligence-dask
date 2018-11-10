@@ -1,0 +1,3 @@
+screen -t main bash
+screen -t scheduler /usr/local/bin/dask-scheduler
+screen -t workers /usr/local/bin/dask-ssh  --ssh-username cloud-user --remote-python /bin/python36 --worker-port 8787 --nanny-port 8788   --hostfile {{ '/home/'+ ansible_ssh_user + '/dask-workers.lst' }} --nohost --ssh-private-key {{ '/home/'+ ansible_ssh_user + '/.ssh/id_rsa' }} --ssh-username cloud-user --scheduler {{ shedulerIP }}

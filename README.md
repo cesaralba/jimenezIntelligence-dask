@@ -23,6 +23,7 @@ openstack stack delete dask-cluster -y  --wait
 
 ~~~
 
+
 #Lanzar cosas
 ~~~
 . ~/Dropbox/ENVS/Dask/loadEnv
@@ -34,3 +35,10 @@ dask-ssh  --ssh-username cloud-user --remote-python /bin/python --worker-port 87
 ~~~
 
 /var/lib/cloud/instance/scripts/part-001
+
+# Ansible
+~~~
+ansible-playbook -i /tmp/dask/dask-cluster-inventory.txt prepareDaskClusters.yaml  --vault-password-file=/home/calba/devel/SuperManager/vaultPass
+
+~~~ 
+
