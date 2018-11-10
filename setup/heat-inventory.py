@@ -10,7 +10,7 @@
 #!/usr/bin/python
 
 import argparse
-import sys
+from os.path import join
 from simplejson import loads
 from string import Template
 from textwrap import dedent
@@ -133,15 +133,27 @@ $nodes
                 nodes.append(self.nodes_sshkeyscan.substitute(ipaddress=node[1]))
         return "\n".join(nodes)
 
-def main():
+
+def getParameters():
     parser = argparse.ArgumentParser(description='Prepare stack inventory')
     parser.add_argument("-s", "--stack", default=argparse.SUPPRESS)
+
     parser.add_argument("-u", "--ssh_user", default=argparse.SUPPRESS)
     parser.add_argument("-k", "--ssh_key", default=argparse.SUPPRESS)
+
+    parser.add_argument("-d", "--output-dir", default=".", dest="outputdir", type=str)
+
     opts = vars(parser.parse_args())
 
-    stack_opts = opts
-    # stack_opts['stack'] = stack_opts.get('stack', 'hadoop-stack')
+    return opts
+
+def composeFich(opts, fichname):
+    return join(opts['outputdir'], fichname)
+
+def main():
+
+    stack_opts = getParameters()
+
     stack_inv = heat_inventory(**stack_opts)
 
     schedulerIP = None
@@ -149,16 +161,16 @@ def main():
     if schedulerList:
         schedulerIP = schedulerList[0][2]
 
-    inventory_file = open('%s-inventory.txt' % stack_opts['stack'], 'w')
+    inventory_file = open(composeFich(stack_opts,'%s-inventory.txt' % stack_opts['stack']), 'w')
     inventory_file.write(stack_inv.get_hosts_InvOutput('dask_nodes_data', 'dask-workers', schedulerAdd=schedulerIP))
     inventory_file.write(stack_inv.get_hosts_InvOutput('dask_scheduler_data', 'dask-scheduler'))
     inventory_file.close()
 
-    nodes_file = open('dask-workers', 'w')
+    nodes_file = open(composeFich(stack_opts,'dask-workers'), 'w')
     nodes_file.write(stack_inv.get_nodes_output('nodes', 'dask_nodes_data', 'workers'))
     nodes_file.close()
 
-    keyscan_script_file = open('scan-node-keys.sh', 'w')
+    keyscan_script_file = open(composeFich(stack_opts,'scan-node-keys.sh'), 'w')
     keyscan_script_file.write(stack_inv.get_node_keyscan_script('self.heat_output', 'dask_nodes_data', 'dask_scheduler_data'))
     keyscan_script_file.write('\n')
     keyscan_script_file.close()

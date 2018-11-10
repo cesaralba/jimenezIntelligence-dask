@@ -11,11 +11,13 @@
 #Crear
 ~~~
  openstack stack create -e EPG-env.yaml -t heat-dask-cluster.yaml dask-cluster --wait
- python heat-inventory.py -s dask-cluster
+ mkdir -p /tmp/dask
+ python heat-inventory.py -s dask-cluster -d /tmp/dask
 ~~~
 
 #Destruir
 ~~~
+
 
 openstack stack delete dask-cluster -y  --wait
 
