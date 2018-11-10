@@ -14,3 +14,7 @@ __pycache__
 
 /setup/distr
 clientList.txt
+*-inventory.txt
+scan-node-keys.sh
+dask-workers
+

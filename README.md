@@ -8,11 +8,27 @@
 
 2. Copiar el ejemplo de fichero de entorno (environment_sample.yaml) a otro nombre (ej cap-environment.yaml) y editar los valores al gusto
 
+#Crear
 ~~~
- openstack stack create -e EPG-env.yaml -t heat-hadoop-cluster.yaml dask-cluster --wait -v
- openstack server list | awk '{print $9}' | grep 10.95 > clientList.txt 
-
-penstack stack delete dask-cluster -y  -v --wait
-
+ openstack stack create -e EPG-env.yaml -t heat-dask-cluster.yaml dask-cluster --wait
+ python heat-inventory.py -s dask-cluster
 ~~~
 
+#Destruir
+~~~
+
+openstack stack delete dask-cluster -y  --wait
+
+~~~
+
+#Lanzar cosas
+~~~
+. ~/Dropbox/ENVS/Dask/loadEnv
+
+dask-scheduler
+
+dask-ssh  --ssh-username cloud-user --remote-python /bin/python --worker-port 8787 --nanny-port 8788 --nohost  --hostfile clientList.txt
+
+~~~
+
+/var/lib/cloud/instance/scripts/part-001
