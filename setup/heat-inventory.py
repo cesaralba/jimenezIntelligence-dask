@@ -166,9 +166,9 @@ def main():
     inventory_file.write(stack_inv.get_hosts_InvOutput('dask_scheduler_data', 'dask-scheduler'))
     inventory_file.close()
 
-    nodes_file = open(composeFich(stack_opts,'dask-workers'), 'w')
-    nodes_file.write(stack_inv.get_nodes_output('nodes', 'dask_nodes_data', 'workers'))
-    nodes_file.close()
+    # nodes_file = open(composeFich(stack_opts,'dask-workers'), 'w')
+    # nodes_file.write(stack_inv.get_nodes_output('nodes', 'dask_nodes_data', 'workers'))
+    # nodes_file.close()
 
     keyscan_script_file = open(composeFich(stack_opts,'scan-node-keys.sh'), 'w')
     keyscan_script_file.write(stack_inv.get_node_keyscan_script('self.heat_output', 'dask_nodes_data', 'dask_scheduler_data'))
